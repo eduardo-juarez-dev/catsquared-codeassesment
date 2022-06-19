@@ -1,19 +1,29 @@
 import {Component} from '@angular/core';
 import {Client, WeatherForecast} from "./weatherapp.swagger";
 
-@Component({
+@Component({  
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   providers: [Client]
-})
+ })
+
 export class AppComponent {
+  title = 'TestUI';
   weatherData: WeatherForecast[] = [];
 
   constructor(
     private client: Client
   ) {
     this.getWeather();
+  }
+
+  public ngOnInit(){
+    this.getWeather();
+  }
+
+  getClient(){
+    return this.client;
   }
 
   /**
@@ -24,7 +34,7 @@ export class AppComponent {
   getWeather() {
     this.client.unauthenticated().subscribe({
       complete: () => {},
-      error: (error) => {
+      error: (error: any) => {
         this.handleError(error);
       },
       next: (data: WeatherForecast[]) => {
@@ -33,6 +43,20 @@ export class AppComponent {
     })
   }
 
+  getColor(summary: string): string{
+
+    if((summary === 'Freezing') || (summary === 'Bracing') || (summary === 'Chilly')){
+      return "cyan";
+    }else if((summary === 'Mild') || (summary === 'Balmy') || (summary === 'Cool')){
+      return "green";
+    }else if((summary === 'Warm') || (summary === 'Hot')){
+      return "orange";
+    }else if((summary === 'Sweltering') || (summary === 'Scorching')){
+      return "red";
+    }         
+    
+    return "black";
+  }
 
   /**
    * Dummy Error Handler

@@ -1,3 +1,37 @@
+.titleHeader{
+  text-align: center;
+}
+
+h6,p{
+  font-size: 18px;
+  // font-weight: bold;
+}
+
+.container{
+	box-shadow: 0 15px 30px 1px grey;
+	background: rgba(244, 254, 255, 0.9);
+	border-radius: 5px;
+	overflow: hidden;
+	margin: 1em auto;
+  width: 500px;
+}
+
 .card {
   top: 1rem;
+}
+
+.card-body{
+  h5{
+    text-align: right;
+  }
+
+  p{
+    text-align: center;
+    background-color: rgb(177, 129, 199);
+    margin: 0 8em;
+  }
+
+  .summary{
+    border-radius: 5px;
+  }
 }
