@@ -19,46 +19,49 @@ namespace TestAPI.Services
       _weatherDatabase = weatherDatabase;
     }
 
+    // Modified code to not break when not finding forecasts
     public async IAsyncEnumerable<WeatherForecast> GetAsync(int number, [EnumeratorCancellation] CancellationToken token)
     {
       var startDate = DateTime.Today;
       var endDate = startDate + TimeSpan.FromDays(number);
       var forecasts = await _weatherDatabase.Forecasts.Include(x => x.Summary).Where(x => x.Id >= startDate && x.Id < endDate).ToDictionaryAsync(x => x.Id, token);
+
       var dirty = false;
-      List<Summary> summaries = null;
+        List<Summary> summaries = null;
 
-      for (var currentDate = startDate; currentDate < endDate; currentDate += TimeSpan.FromDays(1))
-      {
-        if (!forecasts.TryGetValue(currentDate, out var forecast))
+        for (var currentDate = startDate; currentDate < endDate; currentDate += TimeSpan.FromDays(1))
         {
-          summaries ??= await _weatherDatabase.Summaries.AsQueryable().ToListAsync(token);
-          var celsius = _rng.Next(-20, 55);
-          var summary = summaries.Single(s => (!s.CelsiusLow.HasValue || celsius >= s.CelsiusLow.Value) && (!s.CelsiusHigh.HasValue || celsius < s.CelsiusHigh.Value));
-
-          forecast = new Forecast
+          if (!forecasts.TryGetValue(currentDate, out var forecast))
           {
-            Celsius = celsius,
-            Id = currentDate,
-            SummaryId = summary.Id,
-            Summary = summary
-          };
+            summaries ??= await _weatherDatabase.Summaries.AsQueryable().ToListAsync(token);
+            var celsius = _rng.Next(-20, 55);
+            var summary = summaries.Single(s => (!s.CelsiusLow.HasValue || celsius >= s.CelsiusLow.Value) && (!s.CelsiusHigh.HasValue || celsius < s.CelsiusHigh.Value));
+            summary = null;
 
-          _weatherDatabase.Forecasts.Add(forecast);
-          dirty = true;
+            forecast = new Forecast
+            {
+              Celsius = celsius,
+              Id = currentDate,
+              SummaryId = summary.Id,
+              Summary = summary
+            };
+
+            _weatherDatabase.Forecasts.Add(forecast);
+            dirty = true;
+          }
+
+          yield return new WeatherForecast
+          {
+            Date = forecast.Id,
+            Summary = forecast.Summary.Id,
+            TemperatureC = forecast.Celsius
+          };
         }
 
-        yield return new WeatherForecast
+        if (dirty)
         {
-          Date = forecast.Id,
-          Summary = forecast.Summary.Id,
-          TemperatureC = forecast.Celsius
-        };
-      }
-
-      if (dirty)
-      {
-        await _weatherDatabase.SaveChangesAsync(token);
-      }
+          await _weatherDatabase.SaveChangesAsync(token);
+        }
     }
   }
 }
