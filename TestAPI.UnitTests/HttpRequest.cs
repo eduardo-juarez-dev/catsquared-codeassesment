@@ -6,6 +6,7 @@ using TestAPI.Models;
 
 namespace TestAPI.UnitTests;
 
+// NOTE: These tests should be run when API is running.
 public class HttpRequest
 {
     private readonly HttpClient httpClient = new HttpClient();
