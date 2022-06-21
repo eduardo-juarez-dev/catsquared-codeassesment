@@ -1,5 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Newtonsoft.Json;
+using TestAPI.Models;
 
 namespace TestAPI.UnitTests;
 
@@ -29,4 +32,18 @@ public class HttpRequest
         Assert.Equal("OK", status);
         Assert.Equal("application/json", result);
     }
+    
+    // Test if service returns a valid List<WeatherForecast>
+    [Fact]
+    public async void GetWeatherForecastUnauthenticated_ShouldReturnValidList_WithNoToken()
+    {
+        HttpResponseMessage response = await httpClient.GetAsync("http://localhost:5100/WeatherForecast/unauthenticated?days=5");
+        if (response.IsSuccessStatusCode)
+        {
+            var content= response.Content.ReadAsStringAsync().Result;
+            var results = JsonConvert.DeserializeObject<List<WeatherForecast>>(content);
+            Assert.Equal(typeof(List<WeatherForecast>), results.GetType()); 
+        }
+        Assert.True(response.IsSuccessStatusCode);
+    }    
 }

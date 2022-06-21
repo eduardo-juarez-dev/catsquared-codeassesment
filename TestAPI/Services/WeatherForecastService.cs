@@ -36,7 +36,6 @@ namespace TestAPI.Services
             summaries ??= await _weatherDatabase.Summaries.AsQueryable().ToListAsync(token);
             var celsius = _rng.Next(-20, 55);
             var summary = summaries.Single(s => (!s.CelsiusLow.HasValue || celsius >= s.CelsiusLow.Value) && (!s.CelsiusHigh.HasValue || celsius < s.CelsiusHigh.Value));
-            summary = null;
 
             forecast = new Forecast
             {
